@@ -2,8 +2,14 @@ import React from "react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import Card from "../components/Card";
 import { ethers } from "ethers";
+import { useDispatch } from "react-redux";
+import { fetchProof } from "../features/zkp/zkpSlice";
+import { AppDispatch } from "../store";
+import ProofDisplay from "../components/ProofDisplay";
 
 const Home: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
   const checkTransaction = async (txHash: string) => {
     const provider = new ethers.JsonRpcProvider(
       "https://sepolia.era.zksync.dev"
@@ -32,27 +38,29 @@ const Home: React.FC = () => {
         <TabPanels>
           <TabPanel>
             <Card
-              title="query tx hash"
-              description="fill in txhash, queryTxHash, and lock 0.05ETH"
-              buttonText="submit query"
+              title="Query Transaction Hash"
+              description="Enter a transaction hash to query its existence on L2 and lock 0.05 ETH."
+              buttonText="Submit Query"
               onClick={checkTransaction}
             />
           </TabPanel>
           <TabPanel>
             <Card
-              title="get ZK proof"
-              description="get the proof"
-              buttonText="get proof"
-              onClick={() => console.log("interaction2")}
+              title="Retrieve ZK Proof"
+              description="Retrieve the zero-knowledge proof for the specified transaction."
+              buttonText="Retrieve Proof"
+              onClick={() => dispatch(fetchProof())}
             />
+            <ProofDisplay />
           </TabPanel>
           <TabPanel>
             <Card
-              title="L1 Verificaion"
-              description="submit ZK proof"
-              buttonText="submit proof"
+              title="Submit for L1 Verification"
+              description="Submit the zero-knowledge proof to Layer 1 to confirm the existence of the transaction hash on Layer 2 securely."
+              buttonText="Submit Proof"
               onClick={() => console.log("interaction3")}
             />
+            <ProofDisplay />
           </TabPanel>
         </TabPanels>
       </Tabs>
