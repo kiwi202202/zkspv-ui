@@ -6,14 +6,14 @@ import { useDispatch } from "react-redux";
 import { fetchProof } from "../features/zkp/zkpSlice";
 import { AppDispatch } from "../store";
 import ProofDisplay from "../components/ProofDisplay";
+import TransactionDetails from "../components/TransactionDetails";
 
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const checkTransaction = async (txHash: string) => {
-    const provider = new ethers.JsonRpcProvider(
-      "https://sepolia.era.zksync.dev"
-    );
+    const providerUrl = process.env.REACT_APP_ZKSYNC_RPC_URL;
+    const provider = new ethers.JsonRpcProvider(providerUrl);
     try {
       const tx = await provider.getTransaction(txHash);
       if (tx && tx.type === 2) {
@@ -52,6 +52,7 @@ const Home: React.FC = () => {
               onClick={() => dispatch(fetchProof())}
             />
             <ProofDisplay />
+            <TransactionDetails />
           </TabPanel>
           <TabPanel>
             <Card
@@ -61,6 +62,7 @@ const Home: React.FC = () => {
               onClick={() => console.log("interaction3")}
             />
             <ProofDisplay />
+            <TransactionDetails />
           </TabPanel>
         </TabPanels>
       </Tabs>
