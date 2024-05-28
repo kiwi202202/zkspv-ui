@@ -29,10 +29,13 @@ const TransactionDetails: React.FC = () => {
   }, []);
 
   return (
-    <Box p={5} shadow="md" borderWidth="1px">
-      <VStack spacing={4} align="stretch">
+    <Box p={5} shadow="none" border="1px solid black" bg="white">
+      <VStack spacing={1} align="stretch">
         {transaction ? (
           <>
+            <Text fontSize="lg" fontWeight="bold" color="brand.700">
+              "Compressed" data in tx hash:
+            </Text>
             <Text>Chain ID: {transaction.chainId.toString()}</Text>
             <Text>Nonce: {transaction.nonce}</Text>
             <Text>
@@ -43,7 +46,7 @@ const TransactionDetails: React.FC = () => {
             <Text>Gas Limit: {transaction.gasLimit?.toString()}</Text>
             <Text>To: {transaction.to}</Text>
             <Text>Value: {transaction.value?.toString()}</Text>
-            <Text>Data: {transaction.data}</Text>
+            <Text>CallData: {transaction.data}</Text>
             <Text>Access List: {JSON.stringify(transaction.accessList)}</Text>
             <Text>V: {transaction.signature.v}</Text>
             <Text>R: {transaction.signature.r}</Text>

@@ -7,6 +7,7 @@ import { fetchProof } from "../features/zkp/zkpSlice";
 import { AppDispatch } from "../store";
 import ProofDisplay from "../components/ProofDisplay";
 import TransactionDetails from "../components/TransactionDetails";
+import WorkflowDiagram from "../components/WorkflowDiagram";
 
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -30,21 +31,22 @@ const Home: React.FC = () => {
   return (
     <div>
       <Tabs isFitted variant="enclosed">
-        <TabList mb="1em">
-          <Tab>query L2 TX Hash on L1</Tab>
-          <Tab>get ZK Proof</Tab>
+        <TabList mb="1em" border="1px solid black" borderRadius="0">
+          <Tab>Query L2 TX Hash on L1</Tab>
+          <Tab>Retrieve ZK Proof</Tab>
           <Tab>L1 Verification</Tab>
         </TabList>
         <TabPanels>
-          <TabPanel>
+          <TabPanel display="flex" flexDirection="column" alignItems="center">
             <Card
               title="Query Transaction Hash"
               description="Enter a transaction hash to query its existence on L2 and lock 0.05 ETH."
               buttonText="Submit Query"
               onClick={checkTransaction}
             />
+            <WorkflowDiagram />
           </TabPanel>
-          <TabPanel>
+          <TabPanel display="flex" flexDirection="column" alignItems="center">
             <Card
               title="Retrieve ZK Proof"
               description="Retrieve the zero-knowledge proof for the specified transaction."
@@ -54,7 +56,7 @@ const Home: React.FC = () => {
             <ProofDisplay />
             <TransactionDetails />
           </TabPanel>
-          <TabPanel>
+          <TabPanel display="flex" flexDirection="column" alignItems="center">
             <Card
               title="Submit for L1 Verification"
               description="Submit the zero-knowledge proof to Layer 1 to confirm the existence of the transaction hash on Layer 2 securely."

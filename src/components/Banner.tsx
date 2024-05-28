@@ -1,11 +1,10 @@
-import { Flex, Button, useColorMode, Box } from "@chakra-ui/react";
+import { Flex, Button, Box } from "@chakra-ui/react";
 import { FiGithub, FiTwitter } from "react-icons/fi";
 import { FaDiscord } from "react-icons/fa";
 import { useEthereum } from "../contexts/EthereumContext";
 
 const Banner = () => {
   const { account, connect } = useEthereum();
-  const { colorMode } = useColorMode();
 
   return (
     <Box
@@ -14,7 +13,6 @@ const Banner = () => {
       p={4}
       color="black"
       borderBottom="2px solid"
-      borderColor={colorMode === "dark" ? "gray.800" : "gray.200"}
     >
       <Flex
         align="center"
@@ -29,7 +27,7 @@ const Banner = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button leftIcon={<FiGithub />} variant="solid" colorScheme="red">
+            <Button leftIcon={<FiGithub />} variant="ghost" colorScheme="gray">
               GitHub
             </Button>
           </a>
@@ -38,7 +36,7 @@ const Banner = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button leftIcon={<FaDiscord />} variant="solid" colorScheme="red">
+            <Button leftIcon={<FaDiscord />} variant="ghost" colorScheme="gray">
               Discord
             </Button>
           </a>
@@ -47,7 +45,7 @@ const Banner = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button leftIcon={<FiTwitter />} variant="solid" colorScheme="red">
+            <Button leftIcon={<FiTwitter />} variant="ghost" colorScheme="gray">
               Twitter
             </Button>
           </a>
@@ -55,11 +53,11 @@ const Banner = () => {
 
         <Flex align="center">
           {account ? (
-            <Button variant="solid" colorScheme="red">
+            <Button variant="solid">
               {account.slice(0, 6) + "..." + account.slice(-4)}
             </Button>
           ) : (
-            <Button onClick={connect} variant="solid" colorScheme="red">
+            <Button onClick={connect} variant="solid">
               Connect Wallet
             </Button>
           )}
