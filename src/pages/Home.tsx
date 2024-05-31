@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import Card from "../components/Card";
 import { ethers } from "ethers";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchProof } from "../features/zkp/zkpSlice";
-import { AppDispatch } from "../store";
+import { AppDispatch, RootState } from '../store';
 import ProofDisplay from "../components/ProofDisplay";
 import TransactionDetails from "../components/TransactionDetails";
 import WorkflowDiagram from "../components/WorkflowDiagram";
@@ -18,6 +18,7 @@ const Home: React.FC = () => {
   const { signer } = useEthereum();
   const contractAddress = "0xFfce55B5fBBCD12f9ba7ee44166638dD43880b09";
   const [abi, setAbi] = useState<ethers.InterfaceAbi | undefined>(undefined);
+  const { proof } = useSelector((state: RootState) => state.zkp);
 
   useEffect(() => {
     const fetchABI = async () => {
@@ -56,6 +57,7 @@ const Home: React.FC = () => {
           duration: 5000,
           isClosable: true,
         });
+        return;
       }
     } catch (error) {
       console.error("Error fetching transaction:", error);
@@ -69,72 +71,79 @@ const Home: React.FC = () => {
       return; // Stop further execution if the transaction fetch fails
     }
 
-    // Step 2: Interact with a contract (Assuming you have a method like initiateQuery in your contract)
-    if (signer) {
-      if (abi) {
+    // Step 2: Interact with a contract
+    if (signer && abi) {
+      try{
         const contract = new ethers.Contract(contractAddress, abi, signer);
         await contract.initiateQuery(txHash, {
           value: ethers.parseEther("0.05"),
         });
-      }
-    }
 
-    // Step 3: Make an RPC call to the backend
-    const rpcData = {
-      jsonrpc: "2.0",
-      method: "GenerateChallengeProofWithSpvFrontMode",
-      params: [txHash, "324"],
-      id: 1,
-    };
-    const rpcUrl = "http://127.0.0.1:8100/rpc";
-    try {
-      const response = await axios.post(rpcUrl, rpcData);
-      console.log("RPC Response:", response.data);
-    } catch (error) {
-      console.error("RPC Error:", error);
+        // Step 3: Make an RPC call to the backend
+        const rpcData = {
+          jsonrpc: "2.0",
+          method: "GenerateChallengeProofWithSpvFrontMode",
+          params: [txHash, "300"],
+          id: 1,
+        };
+        const rpcUrl = "/rpc";
+        try {
+          const response = await axios.post(rpcUrl, rpcData);
+          console.log("RPC Response:", response.data);
+        } catch (error) {
+          console.error("RPC Error:", error);
+          toast({
+            title: "RPC Error",
+            description: "Failed to make backend call.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        } 
+      }catch (contractError) {
+        console.error("Contract Interaction Error:", contractError);
+        toast({
+          title: "Contract Error",
+          description: "Failed to interact with the contract.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return; // Stop further execution if contract interaction fails
+      }
+    } else {
+      console.error("Signer or ABI is missing");
       toast({
-        title: "RPC Error",
-        description: "Failed to make backend call.",
+        title: "Initialization Error",
+        description: "Signer or contract ABI is not properly initialized.",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
+      return; // Stop execution if the signer or ABI is missing
+    }
+  }
+      
+
+  const handleVerification = async (txHash: string) => {
+    if (signer && proof && abi && txHash) {
+      console.log("Verification", proof);
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+      console.log("I am here");
+      try {
+        const result = await contract.verifyQuery(txHash, proof);
+        console.log("Verification result:", result);
+      } catch (error) {
+        console.error("Contract interaction failed", error);
+      }
+      console.log("I am here!");
+
+    } else {
+      console.log("Signer, ABI, Proof, or Transaction Hash is missing");
     }
   };
 
-  const checkTransaction = async (txHash: string) => {
-    const providerUrl = process.env.REACT_APP_ZKSYNC_RPC_URL;
-    const provider = new ethers.JsonRpcProvider(providerUrl);
-    try {
-      const tx = await provider.getTransaction(txHash);
-      if (tx && tx.type === 2) {
-        toast({
-          title: "Transaction type check",
-          description: "This is an EIP-1559 transaction.",
-          status: "info",
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        toast({
-          title: "Transaction type check",
-          description: "This is not an EIP-1559 transaction.",
-          status: "warning",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching transaction:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch transaction.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
+
 
   return (
     <div>
@@ -169,7 +178,7 @@ const Home: React.FC = () => {
               title="Submit for L1 Verification"
               description="Submit the zero-knowledge proof to Layer 1 to confirm the existence of the transaction hash on Layer 2 securely."
               buttonText="Submit Proof"
-              onClick={() => console.log("interaction3")}
+              onClick={handleVerification}
             />
             <ProofDisplay />
             <TransactionDetails />

@@ -29,22 +29,20 @@ interface EthereumProviderProps {
 const checkNetwork = async (
   provider: ethers.BrowserProvider
 ): Promise<boolean> => {
-  console.log(et);
-  return true;
-  // const expectedChainId = process.env.REACT_APP_L2_CHAINID;
-  // try {
-  //   const network = await provider.getNetwork();
-  //   if (network.chainId.toString() !== expectedChainId) {
-  //     console.log(
-  //       `Connected to chainId ${network.chainId}, but expected ${expectedChainId}`
-  //     );
-  //     return false;
-  //   }
-  //   return true;
-  // } catch (error) {
-  //   console.error("Error checking network chainId:", error);
-  //   return false;
-  // }
+  const expectedChainId = process.env.REACT_APP_CHAINID;
+  try {
+    const network = await provider.getNetwork();
+    if (network.chainId.toString() !== expectedChainId) {
+      console.log(
+        `Connected to chainId ${network.chainId}, but expected ${expectedChainId}`
+      );
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Error checking network chainId:", error);
+    return false;
+  }
 };
 
 export const EthereumProvider = ({ children }: EthereumProviderProps) => {
