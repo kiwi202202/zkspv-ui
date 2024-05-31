@@ -23,7 +23,7 @@ const Banner = () => {
       >
         <Flex align="center" gap="2">
           <a
-            href="https://github.com/KiwiChen2022"
+            href="https://github.com/Orbiter-Finance/zkspv-circuits/tree/demo"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -32,7 +32,7 @@ const Banner = () => {
             </Button>
           </a>
           <a
-            href="https://discord.gg/8wZA5p5n"
+            href="https://discord.gg/FbztTBvnBT"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -41,7 +41,7 @@ const Banner = () => {
             </Button>
           </a>
           <a
-            href="https://twitter.com/kiwichen2022"
+            href="https://twitter.com/OrbiterResearch"
             target="_blank"
             rel="noopener noreferrer"
           >

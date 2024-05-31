@@ -5,7 +5,7 @@ const WorkflowDiagram: React.FC = () => {
   return (
     <Box mx="auto" maxWidth="80vw" p={4} marginTop="20px">
       <VStack spacing={4}>
-        <Text fontSize="lg" fontWeight="bold" color="brand.700">
+        <Text fontSize="lg" fontWeight="bold" color="brand.500">
           Workflow
         </Text>
         <Text fontSize="md" color="gray.600">

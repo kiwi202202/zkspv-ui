@@ -8,9 +8,11 @@ import { AppDispatch } from "../store";
 import ProofDisplay from "../components/ProofDisplay";
 import TransactionDetails from "../components/TransactionDetails";
 import WorkflowDiagram from "../components/WorkflowDiagram";
+import { useToast } from "@chakra-ui/react";
 
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const toast = useToast();
 
   const checkTransaction = async (txHash: string) => {
     const providerUrl = process.env.REACT_APP_ZKSYNC_RPC_URL;
@@ -18,13 +20,31 @@ const Home: React.FC = () => {
     try {
       const tx = await provider.getTransaction(txHash);
       if (tx && tx.type === 2) {
-        alert("This is an EIP-1559 transaction.");
+        toast({
+          title: "Transaction type check",
+          description: "This is an EIP-1559 transaction.",
+          status: "info",
+          duration: 5000,
+          isClosable: true,
+        });
       } else {
-        alert("This is not an EIP-1559 transaction or no transaction found.");
+        toast({
+          title: "Transaction type check",
+          description: "This is not an EIP-1559 transaction.",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+        });
       }
     } catch (error) {
       console.error("Error fetching transaction:", error);
-      alert("Failed to fetch transaction.");
+      toast({
+        title: "Error",
+        description: "Failed to fetch transaction.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
