@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import Card from "../components/Card";
-import { ethers } from "ethers";
+import { Transaction, ethers } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProof } from "../features/zkp/zkpSlice";
 import { AppDispatch, RootState } from '../store';
@@ -11,6 +11,7 @@ import WorkflowDiagram from "../components/WorkflowDiagram";
 import { useToast } from "@chakra-ui/react";
 import { useEthereum } from "../contexts/EthereumContext";
 import axios from "axios";
+import { fetchTransaction } from "../features/zksync/transactionSlice";
 
 const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -86,7 +87,7 @@ const Home: React.FC = () => {
           params: [txHash, "300"],
           id: 1,
         };
-        const rpcUrl = "/rpc";
+        const rpcUrl = process.env.REACT_APP_BACKEND_RPC_URL!;
         try {
           const response = await axios.post(rpcUrl, rpcData);
           console.log("RPC Response:", response.data);
@@ -123,7 +124,11 @@ const Home: React.FC = () => {
       return; // Stop execution if the signer or ABI is missing
     }
   }
-      
+  
+  const hanldleGetProof = async (txHash: string) => {
+    dispatch(fetchTransaction(txHash));
+    dispatch(fetchProof(txHash));
+  }
 
   const handleVerification = async (txHash: string) => {
     if (signer && proof && abi && txHash) {
@@ -131,13 +136,28 @@ const Home: React.FC = () => {
       const contract = new ethers.Contract(contractAddress, abi, signer);
       console.log("I am here");
       try {
+        const rpcUrl = process.env.REACT_APP_ZKSYNC_RPC_URL;
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+        const txResponse = await provider.getTransaction(txHash);
+        if (!txResponse) {
+          console.log("Transaction not found");
+          return;
+        }
+        const transaction = Transaction.from(txResponse);
+
+        console.log("Serialized transaction:", transaction.serialized);
+      } catch (error) {
+        console.error("Transaction fetch failed", error);
+      }
+
+      try {
         const result = await contract.verifyQuery(txHash, proof);
         console.log("Verification result:", result);
       } catch (error) {
         console.error("Contract interaction failed", error);
       }
       console.log("I am here!");
-
     } else {
       console.log("Signer, ABI, Proof, or Transaction Hash is missing");
     }
@@ -168,7 +188,7 @@ const Home: React.FC = () => {
               title="Retrieve ZK Proof"
               description="Retrieve the zero-knowledge proof for the specified transaction."
               buttonText="Retrieve Proof"
-              onClick={() => dispatch(fetchProof())}
+              onClick={hanldleGetProof}
             />
             <ProofDisplay />
             <TransactionDetails />

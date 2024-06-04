@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import zkpReducer from './features/zkp/zkpSlice'; 
+import zkpReducer from './features/zkp/zkpSlice';
+import transactionReducer from './features/zksync/transactionSlice';
 
 const store = configureStore({
   reducer: {
     zkp: zkpReducer,
+    transaction: transactionReducer,
   },
 });
 
