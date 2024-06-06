@@ -3,8 +3,8 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import Card from "../components/Card";
 import { Transaction, ethers } from "ethers";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProof } from "../features/zkp/zkpSlice";
-import { AppDispatch, RootState } from '../store';
+import { fetchProof, reset } from "../features/zkp/zkpSlice";
+import { AppDispatch, RootState } from "../store";
 import ProofDisplay from "../components/ProofDisplay";
 import TransactionDetails from "../components/TransactionDetails";
 import WorkflowDiagram from "../components/WorkflowDiagram";
@@ -17,7 +17,7 @@ const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const toast = useToast();
   const { signer } = useEthereum();
-  const contractAddress = "0xFfce55B5fBBCD12f9ba7ee44166638dD43880b09";
+  const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS!;
   const [abi, setAbi] = useState<ethers.InterfaceAbi | undefined>(undefined);
   const { proof } = useSelector((state: RootState) => state.zkp);
 
@@ -35,46 +35,123 @@ const Home: React.FC = () => {
     fetchABI();
   }, []);
 
-  const handleTransaction = async (txHash: string) => {
-    const providerUrl = process.env.REACT_APP_ZKSYNC_RPC_URL;
-    const provider = new ethers.JsonRpcProvider(providerUrl);
+  const checkTransaction = async (txHash: string) => {
+    const zksyncProviderUrl = process.env.REACT_APP_ZKSYNC_RPC_URL!;
+    const sepoliaProviderUrl = process.env.REACT_APP_SEPOLIA_RPC_URL!;
+    const graphQLUrl = process.env.REACT_APP_GRAPHQL_URL!;
 
+    const zksyncProvider = new ethers.JsonRpcProvider(zksyncProviderUrl);
+
+    try {
+      const tx = await zksyncProvider.getTransaction(txHash);
+      if (!tx) throw new Error("Transaction not found.");
+      if (tx.type !== 2)
+        throw new Error("This is not an EIP-1559 transaction.");
+
+      const response = await axios.post(zksyncProviderUrl, {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "zks_getTransactionDetails",
+        params: [txHash],
+      });
+
+      const ethCommitTxHash = response.data.result?.ethCommitTxHash;
+      if (!ethCommitTxHash)
+        throw new Error("This transaction has not been committed to L1 yet.");
+
+      const sepoliaProvider = new ethers.JsonRpcProvider(sepoliaProviderUrl);
+      const commitTx = await sepoliaProvider.getTransaction(ethCommitTxHash);
+      if (!commitTx || !commitTx.blockNumber)
+        throw new Error("Commit transaction not found.");
+
+      const queryGTE = `
+  query historyBlocksRootGTE {
+    historyBlocksRootSaveds(where: {id_gte: "${commitTx.blockNumber}"}, orderBy: id, orderDirection: desc) {
+      id
+      blocksRoot
+    }
+  }`;
+
+      const queryLTE = `
+  query historyBlocksRootLTE {
+    historyBlocksRootSaveds(where: {id_lte: "${commitTx.blockNumber}"}, orderBy: id, orderDirection: desc) {
+      id
+      blocksRoot
+    }
+  }`;
+
+      const [responseGTE, responseLTE] = await Promise.all([
+        axios.post(
+          graphQLUrl,
+          { query: queryGTE },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        ),
+        axios.post(
+          graphQLUrl,
+          { query: queryLTE },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        ),
+      ]);
+
+      const resultsGTE = responseGTE.data.data.historyBlocksRootSaveds;
+      const resultsLTE = responseLTE.data.data.historyBlocksRootSaveds;
+      if (resultsGTE.length === 0 || resultsLTE.length === 0)
+        throw new Error(
+          "Block history check failed, one or both directions are missing data."
+        );
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Error during transaction check: ${error.message}`);
+      } else {
+        throw new Error(`Error during transaction check: unknown error`);
+      }
+    }
+  };
+
+  const handleTransaction = async (txHash: string) => {
     // Step 1: Check the transaction
     try {
-      const tx = await provider.getTransaction(txHash);
-      if (tx && tx.type === 2) {
+      await checkTransaction(txHash);
+      toast({
+        title: "Success",
+        description: "Transaction and block history checks passed.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
         toast({
-          title: "Transaction type check",
-          description: "This is an EIP-1559 transaction.",
-          status: "info",
+          title: "Error",
+          description: error.message,
+          status: "error",
           duration: 5000,
           isClosable: true,
         });
       } else {
         toast({
-          title: "Transaction type check",
-          description: "This is not an EIP-1559 transaction.",
-          status: "warning",
+          title: "Error",
+          description: "An unexpected error occurred.",
+          status: "error",
           duration: 5000,
           isClosable: true,
         });
-        return;
       }
-    } catch (error) {
-      console.error("Error fetching transaction:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch transaction.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-      return; // Stop further execution if the transaction fetch fails
     }
 
     // Step 2: Interact with a contract
     if (signer && abi) {
-      try{
+      try {
         const contract = new ethers.Contract(contractAddress, abi, signer);
         await contract.initiateQuery(txHash, {
           value: ethers.parseEther("0.05"),
@@ -100,8 +177,8 @@ const Home: React.FC = () => {
             duration: 5000,
             isClosable: true,
           });
-        } 
-      }catch (contractError) {
+        }
+      } catch (contractError) {
         console.error("Contract Interaction Error:", contractError);
         toast({
           title: "Contract Error",
@@ -123,18 +200,17 @@ const Home: React.FC = () => {
       });
       return; // Stop execution if the signer or ABI is missing
     }
-  }
-  
+  };
+
   const hanldleGetProof = async (txHash: string) => {
+    dispatch(reset());
     dispatch(fetchTransaction(txHash));
     dispatch(fetchProof(txHash));
-  }
+  };
 
   const handleVerification = async (txHash: string) => {
     if (signer && proof && abi && txHash) {
-      console.log("Verification", proof);
       const contract = new ethers.Contract(contractAddress, abi, signer);
-      console.log("I am here");
       try {
         const rpcUrl = process.env.REACT_APP_ZKSYNC_RPC_URL;
         const provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -145,25 +221,24 @@ const Home: React.FC = () => {
           return;
         }
         const transaction = Transaction.from(txResponse);
+        console.log("Serialized transaction:", transaction.serialized);
+
+        try {
+          const result = await contract.verifyQuery(txHash, proof);
+          console.log("Verification result:", result);
+        } catch (error) {
+          console.error("Contract interaction failed", error);
+        }
+        console.log("I am here!");
 
         console.log("Serialized transaction:", transaction.serialized);
       } catch (error) {
         console.error("Transaction fetch failed", error);
       }
-
-      try {
-        const result = await contract.verifyQuery(txHash, proof);
-        console.log("Verification result:", result);
-      } catch (error) {
-        console.error("Contract interaction failed", error);
-      }
-      console.log("I am here!");
     } else {
       console.log("Signer, ABI, Proof, or Transaction Hash is missing");
     }
   };
-
-
 
   return (
     <div>

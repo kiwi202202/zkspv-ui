@@ -21,8 +21,12 @@ const fetchProofFromBackend = async (txHash: string): Promise<string> => {
     if (response.data.error) {
       throw new Error(`Error from server: ${response.data.error.message}`);
     }
+    const proof = response.data.result.proof;
+    if (proof === "0x") {
+      throw new Error('Proof computation is not yet complete');
+    }
     console.log(response);
-    return response.data.result.proof;
+    return proof;
   } catch (error) {
     if (error instanceof Error) {
       throw error;
@@ -63,11 +67,14 @@ const initialState: ZKPState = {
 const zkpSlice = createSlice({
   name: 'zkp',
   initialState,
-  reducers: {},
+  reducers: {
+    reset: () => initialState,
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProof.pending, (state) => {
         state.status = 'loading';
+        state.error = null;
       })
       .addCase(fetchProof.fulfilled, (state, action: PayloadAction<string>) => {
         state.status = 'succeeded';
@@ -80,4 +87,5 @@ const zkpSlice = createSlice({
   }
 });
 
+export const { reset } = zkpSlice.actions;
 export default zkpSlice.reducer;
