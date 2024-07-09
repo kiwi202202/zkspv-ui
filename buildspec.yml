@@ -1,0 +1,34 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing source NPM dependencies...
+      - npm install
+  pre_build:
+    commands:
+      - echo Retrieving secrets...
+      - |
+        aws secretsmanager get-secret-value --secret-id zk-light-client-ui --region ap-southeast-1 | 
+        jq -r ".SecretString" | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" > .env
+  build:
+    commands:
+      - echo Build started on `date`
+      - npm run build
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Zipping build directory...
+      - zip -r build.zip build/
+      - echo Deleting old files from S3 bucket...
+      - aws s3 rm s3://zk-light-client-ui --recursive
+      - echo Uploading build.zip to S3...
+      - aws s3 cp build.zip s3://zk-light-client-ui/build.zip
+
+artifacts:
+  files:
+    - build.zip
+
+cache:
+  paths:
+    - "node_modules/**/*"
