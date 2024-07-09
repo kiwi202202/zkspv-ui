@@ -25,8 +25,9 @@ const WorkflowDiagram: React.FC = () => {
         <Image
           src={`${process.env.PUBLIC_URL}/workflow-diagram.png`}
           alt="Workflow Diagram"
-          maxWidth="80%"
+          maxWidth="70%"
           height="auto"
+          objectFit="contain"
         />
         {/* </Center> */}
       </VStack>
