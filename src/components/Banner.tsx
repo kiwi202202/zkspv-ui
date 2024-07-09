@@ -1,10 +1,28 @@
 import { Flex, Button, Box } from "@chakra-ui/react";
-import { FiGithub, FiTwitter } from "react-icons/fi";
-import { FaDiscord } from "react-icons/fa";
 import { useEthereum } from "../contexts/EthereumContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Banner = () => {
   const { account, connect } = useEthereum();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const baseStyle = {
+    bg: "transparent",
+    border: "none",
+    color: "#666666",
+    fontSize: "14px",
+    _hover: { bg: "transparent", textDecoration: "none" },
+    _active: { bg: "transparent" },
+    _focus: { boxShadow: "none" },
+  };
+
+  const activeStyle = {
+    color: "brand.500",
+    textDecoration: "none",
+  };
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <Box
@@ -21,34 +39,34 @@ const Banner = () => {
         maxW="1200px"
         m="0 auto"
       >
-        <Flex align="center" gap="2">
-          <a
-            href="https://github.com/Orbiter-Finance/zkspv-circuits/tree/demo"
-            target="_blank"
-            rel="noopener noreferrer"
+        <Flex align="center" gap="64px">
+          <Button
+            onClick={() => navigate("/")}
+            sx={{
+              ...baseStyle,
+              ...(isActive("/") ? activeStyle : {}),
+            }}
           >
-            <Button leftIcon={<FiGithub />} variant="ghost" colorScheme="gray">
-              GitHub
-            </Button>
-          </a>
-          <a
-            href="https://discord.gg/FbztTBvnBT"
-            target="_blank"
-            rel="noopener noreferrer"
+            Query L2 TX Hash on L1
+          </Button>
+          <Button
+            onClick={() => navigate("/retrieve-zk-proof")}
+            sx={{
+              ...baseStyle,
+              ...(isActive("/retrieve-zk-proof") ? activeStyle : {}),
+            }}
           >
-            <Button leftIcon={<FaDiscord />} variant="ghost" colorScheme="gray">
-              Discord
-            </Button>
-          </a>
-          <a
-            href="https://twitter.com/OrbiterResearch"
-            target="_blank"
-            rel="noopener noreferrer"
+            Retrieve ZK Proof
+          </Button>
+          <Button
+            onClick={() => navigate("/l1-verification")}
+            sx={{
+              ...baseStyle,
+              ...(isActive("/l1-verification") ? activeStyle : {}),
+            }}
           >
-            <Button leftIcon={<FiTwitter />} variant="ghost" colorScheme="gray">
-              Twitter
-            </Button>
-          </a>
+            L1 Verification
+          </Button>
         </Flex>
 
         <Flex align="center">

@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { Box, Text, VStack } from "@chakra-ui/react";
 import { TransactionResponse } from "ethers";
-import { useSelector } from 'react-redux';
-import { fetchTransaction } from '../features/zksync/transactionSlice';
+import { useSelector } from "react-redux";
+import { fetchTransaction } from "../features/zksync/transactionSlice";
 import { RootState } from "../store";
 
 const TransactionDetails: React.FC = () => {
-  const { transaction, error, loading } = useSelector((state: RootState) => state.transaction);
+  const { transaction, error, loading } = useSelector(
+    (state: RootState) => state.transaction
+  );
 
   // const [transaction, setTransaction] = useState<TransactionResponse | null>(
   //   null
   // );
   // const [error, setError] = useState<string>("");
-
 
   // useEffect(() => {
   //   const providerUrl = process.env.REACT_APP_ZKSYNC_RPC_URL;
@@ -39,34 +40,49 @@ const TransactionDetails: React.FC = () => {
   // }, []);
 
   return (
-    <Box p={5} shadow="none" border="1px solid black" bg="white">
+    <Box
+      p={5}
+      shadow="none"
+      border="1.5px solid black"
+      bg="white"
+      width="1280px"
+      padding={6}
+    >
       <VStack spacing={1} align="stretch">
-        {transaction ? (
-          <>
-            <Text fontSize="lg" fontWeight="bold" color="brand.500">
-              "Compressed" data in tx hash:
-            </Text>
-            <Text>Chain ID: {transaction.chainId.toString()}</Text>
-            <Text>Nonce: {transaction.nonce}</Text>
-            <Text>
-              Max Priority Fee Per Gas:{" "}
-              {transaction.maxPriorityFeePerGas?.toString()}
-            </Text>
-            <Text>Max Fee Per Gas: {transaction.maxFeePerGas?.toString()}</Text>
-            <Text>Gas Limit: {transaction.gasLimit?.toString()}</Text>
-            <Text>To: {transaction.to}</Text>
-            <Text>Value: {transaction.value?.toString()}</Text>
-            <Text style={{ wordBreak: "break-word" }}>
-              CallData: {transaction.data}
-            </Text>
-            <Text>Access List: {JSON.stringify(transaction.accessList)}</Text>
-            <Text>V: {transaction.signature.v}</Text>
-            <Text>R: {transaction.signature.r}</Text>
-            <Text>S: {transaction.signature.s}</Text>
-          </>
-        ) : (
-          <Text>{error || "Loading transaction details..."}</Text>
-        )}
+        <Text variant="title">"Compressed" data in tx hash</Text>
+        <Text variant="description">
+          Chain ID: {transaction?.chainId?.toString() || "N/A"}
+        </Text>
+        <Text variant="description">Nonce: {transaction?.nonce || "N/A"}</Text>
+        <Text variant="description">
+          Max Priority Fee Per Gas:{" "}
+          {transaction?.maxPriorityFeePerGas?.toString() || "N/A"}
+        </Text>
+        <Text variant="description">
+          Max Fee Per Gas: {transaction?.maxFeePerGas?.toString() || "N/A"}
+        </Text>
+        <Text variant="description">
+          Gas Limit: {transaction?.gasLimit?.toString() || "N/A"}
+        </Text>
+        <Text variant="description">To: {transaction?.to || "N/A"}</Text>
+        <Text variant="description">
+          Value: {transaction?.value?.toString() || "N/A"}
+        </Text>
+        <Text variant="description" style={{ wordBreak: "break-word" }}>
+          CallData: {transaction?.data || "N/A"}
+        </Text>
+        <Text variant="description">
+          Access List: {JSON.stringify(transaction?.accessList) || "N/A"}
+        </Text>
+        <Text variant="description">
+          V: {transaction?.signature?.v || "N/A"}
+        </Text>
+        <Text variant="description">
+          R: {transaction?.signature?.r || "N/A"}
+        </Text>
+        <Text variant="description">
+          S: {transaction?.signature?.s || "N/A"}
+        </Text>
       </VStack>
     </Box>
   );
