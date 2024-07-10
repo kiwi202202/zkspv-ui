@@ -20,16 +20,8 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Zipping build directory...
-      - zip -r build.zip build/
-      - echo Deleting old files from S3 bucket...
-      - aws s3 rm s3://zk-light-client-ui --recursive
-      - echo Uploading build.zip to S3...
-      - aws s3 cp build.zip s3://zk-light-client-ui/build.zip
-
-artifacts:
-  files:
-    - build.zip
+      - echo Syncing build directory to S3...
+      - aws s3 sync build/ s3://zk-light-client-ui --delete
 
 cache:
   paths:
