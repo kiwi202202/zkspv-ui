@@ -114,13 +114,13 @@ const QueryTxHashPage = () => {
     // Step 1: Check the transaction
     try {
       await checkTransaction(txHash);
-      toast({
-        title: "Success",
-        description: "Transaction and block history checks passed.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+      // toast({
+      //   title: "Success",
+      //   description: "Transaction and block history checks passed.",
+      //   status: "success",
+      //   duration: 5000,
+      //   isClosable: true,
+      // });
     } catch (error) {
       if (error instanceof Error) {
         toast({
@@ -139,6 +139,7 @@ const QueryTxHashPage = () => {
           isClosable: true,
         });
       }
+      return;
     }
 
     // Step 2: Interact with a contract
@@ -200,7 +201,7 @@ const QueryTxHashPage = () => {
         title="Query Transaction Hash"
         description="Enter a transaction hash to query its existence on L2 and lock 0.05 ETH."
         buttonText="Submit Query"
-        onClick={() => handleTransaction("ExampleTxHash")}
+        onClick={handleTransaction}
       />
       <WorkflowDiagram />
     </Flex>

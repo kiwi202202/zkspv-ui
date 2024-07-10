@@ -8,7 +8,7 @@ import ProofDisplay from "../components/ProofDisplay";
 import TransactionDetails from "../components/TransactionDetails";
 import { useEthereum } from "../contexts/EthereumContext";
 
-const L1VerificationPanel: React.FC = () => {
+const L1VerificationPage: React.FC = () => {
   const { signer } = useEthereum();
   const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS!;
   const [abi, setAbi] = useState<ethers.InterfaceAbi | undefined>(undefined);
@@ -66,7 +66,7 @@ const L1VerificationPanel: React.FC = () => {
         title="Submit for L1 Verification"
         description="Submit the zero-knowledge proof to Layer 1 to confirm the existence of the transaction hash on Layer 2 securely."
         buttonText="Submit Proof"
-        onClick={() => handleVerification("ExampleTxHash")}
+        onClick={handleVerification}
       />
       <ProofDisplay />
       <TransactionDetails />
@@ -74,4 +74,4 @@ const L1VerificationPanel: React.FC = () => {
   );
 };
 
-export default L1VerificationPanel;
+export default L1VerificationPage;

@@ -24,7 +24,7 @@ const RetrieveZKProofPage: React.FC = () => {
         title="Retrieve ZK Proof"
         description="Retrieve the zero-knowledge proof for the specified transaction."
         buttonText="Retrieve Proof"
-        onClick={() => handleGetProof("ExampleTxHash")}
+        onClick={handleGetProof}
       />
       <ProofDisplay />
       <TransactionDetails />
