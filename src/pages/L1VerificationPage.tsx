@@ -49,7 +49,7 @@ const L1VerificationPanel: React.FC = () => {
         } catch (error) {
           console.error("Contract interaction failed", error);
         }
-        console.log("I am here!");
+        // console.log("I am here!");
 
         console.log("Serialized transaction:", transaction.serialized);
       } catch (error) {
