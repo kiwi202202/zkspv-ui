@@ -161,6 +161,13 @@ const QueryTxHashPage = () => {
         try {
           const response = await axios.post(rpcUrl, rpcData);
           console.log("RPC Response:", response.data);
+          toast({
+            title: "Success",
+            description: "Submit a L2 tx query onchain successfully",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
         } catch (error) {
           console.error("RPC Error:", error);
           toast({
