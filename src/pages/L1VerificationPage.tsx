@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Flex } from "@chakra-ui/react";
+import { Flex, useToast } from "@chakra-ui/react";
 import Card from "../components/Card";
 import { Transaction, ethers } from "ethers";
 import { useSelector } from "react-redux";
@@ -13,6 +13,7 @@ const L1VerificationPage: React.FC = () => {
   const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS!;
   const [abi, setAbi] = useState<ethers.InterfaceAbi | undefined>(undefined);
   const { proof } = useSelector((state: RootState) => state.zkp);
+  const toast = useToast();
 
   useEffect(() => {
     const fetchABI = async () => {
@@ -46,8 +47,23 @@ const L1VerificationPage: React.FC = () => {
         try {
           const result = await contract.verifyQuery(txHash, proof);
           console.log("Verification result:", result);
+          toast({
+            title: "Success",
+            description:
+              "Zero-knowledge proof submitted on-chain successfully.",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
         } catch (error) {
           console.error("Contract interaction failed", error);
+          toast({
+            title: "Error",
+            description: "Failed to submit the zero-knowledge proof on-chain.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
         }
         // console.log("I am here!");
 
@@ -57,6 +73,13 @@ const L1VerificationPage: React.FC = () => {
       }
     } else {
       console.log("Signer, ABI, Proof, or Transaction Hash is missing");
+      toast({
+        title: "Error",
+        description: "Signer, ABI, Proof, or Transaction Hash is missing.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 

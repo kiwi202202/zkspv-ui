@@ -155,7 +155,8 @@ const QueryTxHashPage = () => {
 
         toast({
           title: "Success",
-          description: "Submit a L2 tx query onchain successfully",
+          description:
+            "L2 transaction query submitted on-chain successfully. Please wait 10 minutes for the ZKP to be generated.",
           status: "success",
           duration: 5000,
           isClosable: true,

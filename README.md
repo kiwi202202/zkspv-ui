@@ -1,46 +1,50 @@
-# Getting Started with Create React App
+# ZK Light Client
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+The ZK Light Client leverages zero-knowledge proofs to facilitate the verification of Layer 2 (L2) transaction hashes on Layer 1 (Ethereum). Just like a light client, it operates to verify transactions, but it does so across L1 and L2, enabling efficient and secure L1 verification of L2 transactions.
 
-In the project directory, you can run:
+For detailed zk constraints, please refer to our [zkspv-circuits GitHub repository](https://github.com/Orbiter-Finance/zkspv-circuits/tree/demo).
 
-### `npm start`
+## How It Works
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. **User Queries L2 Transaction Hash**: The user submits a query on [L1 contracts](https://github.com/kiwi202202/zk-light-client-contracts) with the L2 transaction hash they want to verify.
+2. **Retrieve ZK Proof**: The user retrieves the corresponding zero-knowledge proof from the [zk prover](https://github.com/Orbiter-Finance/zkspv-circuits/tree/demo).
+3. **L1 Verification**: The zero-knowledge proof is used to confirm the validity and existence of the L2 transaction on the L1 blockchain.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Current Limitations
 
-### `npm test`
+1. **EIP-1559 Transactions Only**: The current implementation only supports EIP-1559 type transactions.
+2. **zkSync L2 Network**: At this stage, we only support the zkSync L2 network.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Getting Started
 
-### `npm run build`
+### Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Node.js
+- npm
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/kiwi202202/zkspv-ui
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd zkspv-ui
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-### `npm run eject`
+### Running the Project
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. Start the development server:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+   ```bash
+   npm start
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. Open your browser and navigate to `http://localhost:3000`.

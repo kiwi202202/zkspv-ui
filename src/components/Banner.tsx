@@ -1,4 +1,4 @@
-import { Flex, Button, Box } from "@chakra-ui/react";
+import { Flex, Button, Box, Image } from "@chakra-ui/react";
 import { useEthereum } from "../contexts/EthereumContext";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -36,10 +36,18 @@ const Banner = () => {
         align="center"
         justify="space-between"
         wrap="wrap"
-        maxW="1200px"
+        maxW="1280px"
+        width="1280px"
         m="0 auto"
       >
         <Flex align="center" gap="64px">
+          <Image
+            src="/logo-orbiter-2.png"
+            alt="Orbiter Logo"
+            width="200px"
+            height="40px"
+            borderRadius="0px"
+          />
           <Button
             onClick={() => navigate("/")}
             sx={{

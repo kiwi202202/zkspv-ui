@@ -1,5 +1,5 @@
 import React from "react";
-import { Flex } from "@chakra-ui/react";
+import { Flex, useToast } from "@chakra-ui/react";
 import Card from "../components/Card";
 import { useDispatch } from "react-redux";
 import { fetchProof, reset } from "../features/zkp/zkpSlice";
@@ -11,11 +11,32 @@ import { fetchTransaction } from "../features/zksync/transactionSlice";
 
 const RetrieveZKProofPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const toast = useToast();
 
   const handleGetProof = async (txHash: string) => {
     dispatch(reset());
-    dispatch(fetchTransaction(txHash));
-    dispatch(fetchProof(txHash));
+    // dispatch(fetchTransaction(txHash));
+    // dispatch(fetchProof(txHash));
+
+    try {
+      await dispatch(fetchTransaction(txHash)).unwrap();
+      await dispatch(fetchProof(txHash)).unwrap();
+      toast({
+        title: "Success",
+        description: "Zero-knowledge proof retrieved successfully.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to retrieve the zero-knowledge proof.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
