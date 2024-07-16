@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Flex } from "@chakra-ui/react";
+import { Flex, Spinner } from "@chakra-ui/react";
 import Card from "../components/Card";
 import { ethers } from "ethers";
 import WorkflowDiagram from "../components/WorkflowDiagram";
@@ -12,6 +12,7 @@ const QueryTxHashPage = () => {
   const { signer } = useEthereum();
   const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS!;
   const [abi, setAbi] = useState<ethers.InterfaceAbi | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchABI = async () => {
@@ -31,9 +32,9 @@ const QueryTxHashPage = () => {
     const zksyncProviderUrl = process.env.REACT_APP_ZKSYNC_RPC_URL!;
     const sepoliaProviderUrl = process.env.REACT_APP_SEPOLIA_RPC_URL!;
     const graphQLUrl = process.env.REACT_APP_GRAPHQL_URL!;
-
     const zksyncProvider = new ethers.JsonRpcProvider(zksyncProviderUrl);
 
+    setIsLoading(true);
     try {
       const tx = await zksyncProvider.getTransaction(txHash);
       if (!tx) throw new Error("Transaction not found.");
@@ -107,6 +108,8 @@ const QueryTxHashPage = () => {
       } else {
         throw new Error(`Error during transaction check: unknown error`);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -150,34 +153,42 @@ const QueryTxHashPage = () => {
           value: ethers.parseEther("0.05"),
         });
 
+        toast({
+          title: "Success",
+          description: "Submit a L2 tx query onchain successfully",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+
         // Step 3: Make an RPC call to the backend
-        const rpcData = {
-          jsonrpc: "2.0",
-          method: "GenerateChallengeProofWithSpvFrontMode",
-          params: [txHash, "300"],
-          id: 1,
-        };
-        const rpcUrl = process.env.REACT_APP_BACKEND_RPC_URL!;
-        try {
-          const response = await axios.post(rpcUrl, rpcData);
-          console.log("RPC Response:", response.data);
-          toast({
-            title: "Success",
-            description: "Submit a L2 tx query onchain successfully",
-            status: "success",
-            duration: 5000,
-            isClosable: true,
-          });
-        } catch (error) {
-          console.error("RPC Error:", error);
-          toast({
-            title: "RPC Error",
-            description: "Failed to make backend call.",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-          });
-        }
+        // const rpcData = {
+        //   jsonrpc: "2.0",
+        //   method: "GenerateChallengeProofWithSpvFrontMode",
+        //   params: [txHash, "300"],
+        //   id: 1,
+        // };
+        // const rpcUrl = process.env.REACT_APP_BACKEND_RPC_URL!;
+        // try {
+        //   const response = await axios.post(rpcUrl, rpcData);
+        //   console.log("RPC Response:", response.data);
+        //   toast({
+        //     title: "Success",
+        //     description: "Submit a L2 tx query onchain successfully",
+        //     status: "success",
+        //     duration: 5000,
+        //     isClosable: true,
+        //   });
+        // } catch (error) {
+        //   console.error("RPC Error:", error);
+        //   toast({
+        //     title: "RPC Error",
+        //     description: "Failed to make backend call.",
+        //     status: "error",
+        //     duration: 5000,
+        //     isClosable: true,
+        //   });
+        // }
       } catch (contractError) {
         console.error("Contract Interaction Error:", contractError);
         toast({
@@ -210,6 +221,7 @@ const QueryTxHashPage = () => {
         buttonText="Submit Query"
         onClick={handleTransaction}
       />
+      {isLoading && <Spinner size="xl" />}
       <WorkflowDiagram />
     </Flex>
   );

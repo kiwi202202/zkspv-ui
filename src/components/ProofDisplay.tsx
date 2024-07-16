@@ -21,7 +21,7 @@ const ProofDisplay: React.FC = () => {
     if (error) {
       toast({
         title: "Error",
-        description: error,
+        description: "This proof has not been generated yet",
         status: "error",
         duration: 5000,
         isClosable: true,
