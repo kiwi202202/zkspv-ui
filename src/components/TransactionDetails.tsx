@@ -49,6 +49,10 @@ const TransactionDetails: React.FC = () => {
       padding={6}
     >
       <VStack spacing={1} align="stretch">
+        <Text variant="title">Transaction Receipt</Text>
+        <Text variant="description">
+          Status: {transaction?.receiptStatus?.toString() || "N/A"}
+        </Text>
         <Text variant="title">"Compressed" data in tx hash</Text>
         <Text variant="description">
           Chain ID: {transaction?.chainId?.toString() || "N/A"}

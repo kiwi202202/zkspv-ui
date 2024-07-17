@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { ethers } from 'ethers';
-import { TransactionResponse } from 'ethers';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { ethers } from "ethers";
 
+// Misleading Name, actually is an SerializableTransaction + receiptStatus
 interface SerializableTransaction {
   chainId: string;
   nonce: number;
@@ -17,6 +17,7 @@ interface SerializableTransaction {
     r: string;
     s: string;
   };
+  receiptStatus?: string;
 }
 
 interface TransactionState {
@@ -31,8 +32,11 @@ const initialState: TransactionState = {
   loading: false,
 };
 
-export const fetchTransaction = createAsyncThunk<SerializableTransaction  | null, string>(
-  'transaction/fetchTransaction',
+export const fetchTransaction = createAsyncThunk<
+  SerializableTransaction | null,
+  string
+>(
+  "transaction/fetchTransaction",
   async (txHash: string, { rejectWithValue }) => {
     try {
       const providerUrl = process.env.REACT_APP_ZKSYNC_RPC_URL;
@@ -42,6 +46,10 @@ export const fetchTransaction = createAsyncThunk<SerializableTransaction  | null
       if (!transaction) {
         return null;
       }
+
+      const transactionReceipt = await provider.getTransactionReceipt(txHash);
+      const receiptStatus: string =
+        transactionReceipt?.status === 1 ? "success" : "false";
 
       const serializableTransaction: SerializableTransaction = {
         chainId: transaction.chainId.toString(),
@@ -58,34 +66,41 @@ export const fetchTransaction = createAsyncThunk<SerializableTransaction  | null
           r: transaction.signature.r,
           s: transaction.signature.s,
         },
+        receiptStatus: receiptStatus,
       };
 
       return serializableTransaction;
     } catch (err) {
-      return rejectWithValue('Failed to fetch transaction details.');
+      return rejectWithValue("Failed to fetch transaction details.");
     }
   }
 );
 
 const transactionSlice = createSlice({
-  name: 'transaction',
+  name: "transaction",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchTransaction.pending, (state) => {
       state.loading = true;
     });
-    builder.addCase(fetchTransaction.fulfilled, (state, action: PayloadAction<SerializableTransaction  | null>) => {
-      state.transaction = action.payload;
-      state.loading = false;
-      state.error = null;
-    });
-    builder.addCase(fetchTransaction.rejected, (state, action: PayloadAction<any>) => {
-      state.error = action.payload as string;
-      state.loading = false;
-      state.transaction = null;
-    });
-  }
+    builder.addCase(
+      fetchTransaction.fulfilled,
+      (state, action: PayloadAction<SerializableTransaction | null>) => {
+        state.transaction = action.payload;
+        state.loading = false;
+        state.error = null;
+      }
+    );
+    builder.addCase(
+      fetchTransaction.rejected,
+      (state, action: PayloadAction<any>) => {
+        state.error = action.payload as string;
+        state.loading = false;
+        state.transaction = null;
+      }
+    );
+  },
 });
 
 export default transactionSlice.reducer;
