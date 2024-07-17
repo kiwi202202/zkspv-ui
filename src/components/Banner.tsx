@@ -42,7 +42,7 @@ const Banner = () => {
       >
         <Flex align="center" gap="64px">
           <Image
-            src="/logo-orbiter-2.png"
+            src="/orbiter-logo-4.png"
             alt="Orbiter Logo"
             width="200px"
             height="40px"

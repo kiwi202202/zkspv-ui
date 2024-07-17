@@ -62,7 +62,9 @@ export const EthereumProvider = ({ children }: EthereumProviderProps) => {
       setProvider(provider);
       const networkOk = await checkNetwork(provider);
       if (!networkOk) {
-        setError("You're connected to an unsupported network.");
+        setError(
+          "You're connected to an unsupported network. Please switch to Sepolia testnet."
+        );
         return;
       }
 
